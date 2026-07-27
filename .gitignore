@@ -47,3 +47,13 @@ coverage/
 .env.staging
 .vercel
 add-env.js
+
+# Vercel CLI auto-generated — never commit
+.env
+.env.*
+.env.local
+.env.production
+.env.development
+.env.staging
+.vercel
+add-env.js
