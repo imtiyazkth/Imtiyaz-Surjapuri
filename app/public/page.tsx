@@ -8,7 +8,8 @@ import ArticleCard from "@/components/article/ArticleCard";
 import type { ArticleCard as ArticleCardType } from "@/types/article";
 import Link from "next/link";
 
-export const revalidate = 60; // ISR — regenerate every 60s
+export const dynamic = 'force-dynamic';
+; // ISR — regenerate every 60s
 
 export default async function HomePage() {
   const [featured, latest, trending, categories] = await Promise.all([

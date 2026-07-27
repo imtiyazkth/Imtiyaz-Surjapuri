@@ -166,25 +166,20 @@ async function migrateArticles() {
 
   console.log(`✅ ${DEMO_ARTICLES.length} articles migrated.`);
 }
-
 async function createAdminUser() {
-  // Creates a user record in Firestore for the admin
-  // You must FIRST create the Firebase Auth user via Firebase Console
-  // or via: firebase auth:import
-  //
-  // Replace YOUR_FIREBASE_AUTH_UID with the UID from Firebase Console
-  const UID = "REPLACE_WITH_YOUR_FIREBASE_AUTH_UID";
+  // ...
+  const UID = "AzeQaW1J2AMN7Ata5sh6mKOi0UB3";
 
-  if (UID === "REPLACE_WITH_YOUR_FIREBASE_AUTH_UID") {
-    console.log(
-      "⚠️  Skipping admin user creation — set the UID in the script first."
-    );
-    return;
-  }
+  // if (UID === "AzeQaW1J2AMN7Ata5sh6mKOi0UB3") {
+  //   console.log(
+  //     "⚠️  Skipping admin user creation — set the UID in the script first."
+  //   );
+  //   return;
+  // }
 
   await db.collection("users").doc(UID).set({
     uid: UID,
-    email: "admin@imtiyazsurjapuri.com",
+    email: "imtiyazkth94@gmail.com",
     displayName: "Imtiyaz Surjapuri",
     role: "admin",
     createdAt: new Date().toISOString(),

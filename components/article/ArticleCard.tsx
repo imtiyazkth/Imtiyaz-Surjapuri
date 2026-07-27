@@ -1,24 +1,44 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
-import { formatDistanceToNow } from "date-fns";
-import type { ArticleCard as ArticleCardType } from "@/types/article";
-import CategoryPill from "./CategoryPill";
 import { clsx } from "clsx";
 
 interface ArticleCardProps {
-  article: ArticleCardType;
+  article: {
+    id: string;
+    slug: string;
+    title: string;
+    excerpt?: string;
+    coverImage?: string;
+    coverImageAlt?: string;
+    primaryCategory: string;
+    catColor?: string;
+    author: string;
+    readTime: string;
+    publishedAt?: string | null;
+    viewCount?: number;
+    featured?: boolean;
+    breaking?: boolean;
+    trending?: boolean;
+    categories?: string[];
+    tags?: string[];
+  };
   variant?: "default" | "horizontal" | "compact" | "featured";
   priority?: boolean;
 }
 
-function formatDate(raw: string | null): string {
+function timeAgo(raw?: string | null): string {
   if (!raw) return "";
   try {
-    const d = new Date(raw);
-    return formatDistanceToNow(d, { addSuffix: true });
-  } catch {
-    return "";
-  }
+    const ms    = Date.now() - new Date(raw).getTime();
+    const mins  = Math.floor(ms / 60000);
+    const hours = Math.floor(ms / 3600000);
+    const days  = Math.floor(ms / 86400000);
+    if (mins < 60)  return `${mins}m ago`;
+    if (hours < 24) return `${hours}h ago`;
+    return `${days}d ago`;
+  } catch { return ""; }
 }
 
 export default function ArticleCard({
@@ -26,126 +46,105 @@ export default function ArticleCard({
   variant = "default",
   priority = false,
 }: ArticleCardProps) {
-  const href = `/articles/${article.slug}`;
-  const date = formatDate(article.publishedAt as string);
-  const catColor = article.catColor ?? "#C41C1C";
+  const href  = `/articles/${article.slug}`;
+  const date  = timeAgo(article.publishedAt);
+  const color = article.catColor ?? "#C41C1C";
 
-  // ── Featured (large hero card) ──────────────────────
+  // ── Featured (large overlay card) ─────────────────
   if (variant === "featured") {
     return (
-      <article className="article-card group relative overflow-hidden rounded-lg h-full min-h-[420px] bg-[var(--surface-card)]">
-        {/* Background image */}
+      <article className="group relative overflow-hidden rounded-xl min-h-[380px] flex flex-col justify-end bg-gray-900">
         {article.coverImage && (
-          <div className="absolute inset-0 article-card-image">
-            <Image
-              src={article.coverImage}
-              alt={article.coverImageAlt || article.title}
-              fill
-              className="object-cover"
-              priority={priority}
-              sizes="(max-width: 768px) 100vw, 50vw"
-            />
-            {/* Gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-          </div>
+          <Image
+            src={article.coverImage}
+            alt={article.coverImageAlt || article.title}
+            fill
+            className="object-cover opacity-70 group-hover:opacity-80 transition-opacity"
+            priority={priority}
+            sizes="(max-width:768px) 100vw, 50vw"
+          />
         )}
-        <Link href={href} className="absolute inset-0 z-10">
-          <div className="absolute bottom-0 left-0 right-0 p-5 text-white">
-            <div className="mb-2 flex items-center gap-2 flex-wrap">
-              {article.breaking && (
-                <span className="cat-pill text-[0.6rem] px-2 py-0.5 bg-[var(--brand-red)] text-white border-0">
-                  Breaking
-                </span>
-              )}
-              <CategoryPill
-                name={article.primaryCategory}
-                color={catColor}
-                size="xs"
-              />
-            </div>
-            <h2
-              className="font-display font-bold text-white leading-tight mb-2
-                          text-xl md:text-2xl line-clamp-3 group-hover:underline
-                          decoration-[var(--brand-red)] underline-offset-4"
+        <div className="relative z-10 p-5 bg-gradient-to-t from-black/90 via-black/40 to-transparent">
+          <div className="flex items-center gap-2 mb-2 flex-wrap">
+            {article.breaking && (
+              <span className="px-2 py-0.5 rounded text-[0.6rem] font-bold uppercase tracking-wider bg-red-600 text-white">
+                Breaking
+              </span>
+            )}
+            <span
+              className="px-2 py-0.5 rounded text-[0.6rem] font-bold uppercase tracking-wider"
+              style={{ background: `${color}25`, color, border: `1px solid ${color}50` }}
             >
+              {article.primaryCategory}
+            </span>
+          </div>
+          <Link href={href}>
+            <h2 className="font-display font-bold text-white text-xl leading-tight mb-2 group-hover:underline decoration-red-500 underline-offset-3 line-clamp-3">
               {article.title}
             </h2>
-            <p className="text-white/80 text-sm line-clamp-2 font-sans mb-3">
-              {article.excerpt}
-            </p>
-            <div className="flex items-center gap-3 text-white/70 text-xs font-sans">
-              <span>{article.author}</span>
-              <span>·</span>
-              <span>{date}</span>
-              <span>·</span>
-              <span>{article.readTime} read</span>
-            </div>
+          </Link>
+          {article.excerpt && (
+            <p className="text-white/70 text-sm font-sans line-clamp-2 mb-3">{article.excerpt}</p>
+          )}
+          <div className="flex items-center gap-2 text-white/60 text-xs font-sans">
+            <span>{article.author}</span>
+            {date && <><span>·</span><span>{date}</span></>}
+            <span>·</span><span>{article.readTime} read</span>
           </div>
-        </Link>
-      </article>
-    );
-  }
-
-  // ── Horizontal (sidebar / list view) ───────────────
-  if (variant === "horizontal") {
-    return (
-      <article className="article-card group flex gap-3 rounded-lg overflow-hidden bg-[var(--surface-card)] border border-[var(--surface-border)] p-3">
-        {article.coverImage && (
-          <Link href={href} className="flex-shrink-0 article-card-image rounded-md overflow-hidden">
-            <Image
-              src={article.coverImage}
-              alt={article.coverImageAlt || article.title}
-              width={88}
-              height={72}
-              className="object-cover w-[88px] h-[72px]"
-              sizes="88px"
-            />
-          </Link>
-        )}
-        <div className="flex-1 min-w-0">
-          <CategoryPill
-            name={article.primaryCategory}
-            color={catColor}
-            size="xs"
-          />
-          <Link href={href}>
-            <h3
-              className="font-display font-bold text-[0.9rem] leading-tight
-                          text-[var(--text-primary)] mt-1 mb-1 line-clamp-2
-                          group-hover:text-[var(--brand-red)] transition-colors"
-            >
-              {article.title}
-            </h3>
-          </Link>
-          <p className="text-[var(--text-muted)] text-xs font-sans">
-            {date} · {article.readTime}
-          </p>
         </div>
       </article>
     );
   }
 
-  // ── Compact (tight list, no image) ─────────────────
+  // ── Horizontal (image left, text right) ───────────
+  if (variant === "horizontal") {
+    return (
+      <article className="group flex gap-3 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-3 hover:border-red-300 dark:hover:border-red-700 transition-colors">
+        {article.coverImage && (
+          <Link href={href} className="flex-shrink-0 rounded-lg overflow-hidden">
+            <Image
+              src={article.coverImage}
+              alt={article.coverImageAlt || article.title}
+              width={88}
+              height={72}
+              className="object-cover w-[88px] h-[72px] group-hover:scale-105 transition-transform duration-300"
+            />
+          </Link>
+        )}
+        <div className="flex-1 min-w-0">
+          <span
+            className="inline-block px-2 py-0.5 rounded text-[0.6rem] font-bold uppercase tracking-wider mb-1"
+            style={{ background: `${color}20`, color, border: `1px solid ${color}40` }}
+          >
+            {article.primaryCategory}
+          </span>
+          <Link href={href}>
+            <h3 className="font-display font-bold text-[0.9rem] leading-tight text-gray-900 dark:text-white mt-0.5 mb-1 line-clamp-2 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors">
+              {article.title}
+            </h3>
+          </Link>
+          <p className="text-gray-400 text-xs font-sans">{date} · {article.readTime}</p>
+        </div>
+      </article>
+    );
+  }
+
+  // ── Compact (no image, borderless list item) ───────
   if (variant === "compact") {
     return (
-      <article className="article-card group border-b border-[var(--surface-border)] py-3 last:border-0">
+      <article className="group border-b border-gray-100 dark:border-gray-800 py-3 last:border-0">
         <div className="flex items-start gap-2">
           <span
             className="mt-1.5 flex-shrink-0 w-2 h-2 rounded-full"
-            style={{ backgroundColor: catColor }}
-            aria-hidden="true"
+            style={{ backgroundColor: color }}
           />
           <div>
             <Link href={href}>
-              <h3
-                className="font-display font-semibold text-sm leading-snug
-                            text-[var(--text-primary)] line-clamp-2
-                            group-hover:text-[var(--brand-red)] transition-colors"
-              >
+              <h3 className="font-display font-semibold text-sm leading-snug text-gray-900 dark:text-white line-clamp-2 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors">
                 {article.title}
               </h3>
             </Link>
-            <p className="text-[var(--text-muted)] text-xs font-sans mt-0.5">
+            <p className="text-gray-400 text-xs font-sans mt-0.5">
               {date} · {article.readTime}
             </p>
           </div>
@@ -154,86 +153,70 @@ export default function ArticleCard({
     );
   }
 
-  // ── Default (vertical card with image on top) ───────
+  // ── Default (vertical card with image on top) ──────
   return (
-    <article
-      className={clsx(
-        "article-card group flex flex-col rounded-lg overflow-hidden",
-        "bg-[var(--surface-card)] border border-[var(--surface-border)]"
-      )}
-    >
+    <article className={clsx(
+      "group flex flex-col rounded-xl overflow-hidden",
+      "bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800",
+      "hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200"
+    )}>
       {/* Cover image */}
       {article.coverImage && (
-        <Link
-          href={href}
-          className="article-card-image block relative overflow-hidden"
-          style={{ paddingTop: "60%" }}
-        >
+        <Link href={href} className="block overflow-hidden relative" style={{ paddingTop: "58%" }}>
           <Image
             src={article.coverImage}
             alt={article.coverImageAlt || article.title}
             fill
-            className="object-cover"
+            className="object-cover group-hover:scale-105 transition-transform duration-400"
             priority={priority}
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            sizes="(max-width:640px) 100vw,(max-width:1024px) 50vw,33vw"
           />
           {article.trending && (
-            <span
-              className="absolute top-2 right-2 cat-pill text-[0.6rem] px-2 py-0.5
-                            bg-[var(--brand-gold)] text-white border-0"
-            >
+            <span className="absolute top-2 right-2 px-2 py-0.5 rounded text-[0.6rem] font-bold bg-amber-500 text-white">
               🔥 Trending
             </span>
           )}
         </Link>
       )}
 
-      {/* Content */}
+      {/* Card body */}
       <div className="flex flex-col flex-1 p-4">
-        <div className="mb-2">
-          <CategoryPill
-            name={article.primaryCategory}
-            slug={article.categories?.[0]}
-            color={catColor}
-            size="xs"
-          />
+        {/* Category + Breaking badge */}
+        <div className="flex items-center gap-1.5 flex-wrap mb-2">
           {article.breaking && (
-            <span
-              className="ml-1.5 cat-pill text-[0.6rem] px-2 py-0.5
-                            bg-[var(--brand-red)] text-white border-0"
-            >
+            <span className="px-2 py-0.5 rounded text-[0.6rem] font-bold uppercase tracking-wider bg-red-600 text-white">
               Breaking
             </span>
           )}
+          <span
+            className="px-2 py-0.5 rounded text-[0.6rem] font-bold uppercase tracking-wider"
+            style={{ background: `${color}20`, color, border: `1px solid ${color}40` }}
+          >
+            {article.primaryCategory}
+          </span>
         </div>
 
+        {/* Title + excerpt */}
         <Link href={href} className="flex-1">
-          <h2
-            className="font-display font-bold text-[var(--text-primary)]
-                        leading-snug text-[1rem] mb-2 line-clamp-3
-                        group-hover:text-[var(--brand-red)] transition-colors"
-          >
+          <h2 className="font-display font-bold text-gray-900 dark:text-white leading-snug text-[1rem] mb-2 line-clamp-3 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors">
             {article.title}
           </h2>
-          <p className="text-[var(--text-secondary)] text-sm line-clamp-2 font-serif">
-            {article.excerpt}
-          </p>
+          {article.excerpt && (
+            <p className="text-gray-500 dark:text-gray-400 text-sm line-clamp-2 font-sans">
+              {article.excerpt}
+            </p>
+          )}
         </Link>
 
-        {/* Meta */}
-        <div className="mt-3 pt-3 border-t border-[var(--surface-border)] flex items-center justify-between text-xs text-[var(--text-muted)] font-sans">
-          <span className="font-medium">{article.author}</span>
+        {/* Meta row */}
+        <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between text-xs text-gray-400 font-sans">
+          <span className="font-medium text-gray-600 dark:text-gray-300">{article.author}</span>
           <div className="flex items-center gap-2">
-            <span>{date}</span>
+            {date && <span>{date}</span>}
             <span>·</span>
             <span>{article.readTime}</span>
-            {article.viewCount > 0 && (
-              <>
-                <span>·</span>
-                <span title="views">
-                  👁 {article.viewCount.toLocaleString()}
-                </span>
-              </>
+            {(article.viewCount ?? 0) > 0 && (
+              <><span>·</span><span title="views">👁 {article.viewCount!.toLocaleString()}</span></>
             )}
           </div>
         </div>
