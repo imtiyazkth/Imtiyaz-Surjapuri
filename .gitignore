@@ -37,3 +37,13 @@ next-env.d.ts
 
 # Testing
 coverage/
+
+# Vercel CLI auto-generated files — never commit
+.env
+.env.*
+.env.local
+.env.production
+.env.development
+.env.staging
+.vercel
+add-env.js
