@@ -1,0 +1,20 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // ── Article images ───────────────────────────────
+    // Only authenticated admin users can upload.
+    // Anyone can read (public CDN access).
+    match /articles/{allPaths=**} {
+      allow read: if true;
+      allow write: if request.auth != null
+        && request.resource.size < 5 * 1024 * 1024         // Max 5MB
+        && request.resource.contentType.matches('image/.*'); // Images only
+    }
+
+    // ── Default: deny everything else ───────────────
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
