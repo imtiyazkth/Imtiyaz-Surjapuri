@@ -6,45 +6,24 @@ export default function SearchBar() {
   const router = useRouter();
   const [q, setQ] = useState("");
 
-  const handleSubmit = (e: FormEvent) => {
+  const submit = (e: FormEvent) => {
     e.preventDefault();
-    const trimmed = q.trim();
-    if (trimmed.length > 0) {
-      router.push(`/search?q=${encodeURIComponent(trimmed)}`);
-      setQ("");
-    }
+    const t = q.trim();
+    if (t.length > 1) { router.push(`/search?q=${encodeURIComponent(t)}`); setQ(""); }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="relative">
+    <form onSubmit={submit} className="search-form">
       <input
-        type="search"
-        value={q}
+        type="search" value={q}
         onChange={(e) => setQ(e.target.value)}
         placeholder="Search articles…"
         aria-label="Search"
-        className="w-full h-9 pl-3 pr-10 rounded-md text-sm
-                   bg-[var(--surface-bg)] border border-[var(--surface-border)]
-                   text-[var(--text-primary)] placeholder:text-[var(--text-muted)]
-                   focus:outline-none focus:ring-2 focus:ring-[var(--brand-red)]
-                   focus:border-transparent transition"
+        className="search-input"
       />
-      <button
-        type="submit"
-        aria-label="Search"
-        className="absolute right-2 top-1/2 -translate-y-1/2
-                   text-[var(--text-muted)] hover:text-[var(--brand-red)] transition-colors"
-      >
-        <svg
-          className="w-4 h-4"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth={2}
-          viewBox="0 0 24 24"
-          aria-hidden="true"
-        >
-          <circle cx="11" cy="11" r="8" />
-          <path d="m21 21-4.35-4.35" />
+      <button type="submit" aria-label="Search" className="search-btn">
+        <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
         </svg>
       </button>
     </form>

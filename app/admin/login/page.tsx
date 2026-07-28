@@ -7,157 +7,118 @@ import { SITE_NAME } from "@/lib/constants";
 
 export default function AdminLoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const [email,    setEmail]    = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [error,    setError]    = useState("");
+  const [loading,  setLoading]  = useState(false);
 
   const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
-    setError("");
-    setLoading(true);
-
+    setError(""); setLoading(true);
     try {
-      // 1. Sign in with Firebase client SDK to get ID token
-      const cred = await signInWithEmailAndPassword(auth, email, password);
+      const cred    = await signInWithEmailAndPassword(auth, email, password);
       const idToken = await cred.user.getIdToken();
-
-      // 2. Exchange ID token for HTTP-only session cookie via API route
-      const res = await fetch("/api/auth/login", {
+      const res     = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ idToken }),
       });
-
       const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.error ?? "Login failed");
-        setLoading(false);
-        return;
-      }
-
-      // 3. Redirect to dashboard
+      if (!res.ok) { setError(data.error ?? "Login failed"); setLoading(false); return; }
       router.push("/admin/dashboard");
       router.refresh();
     } catch (err: unknown) {
       const code = (err as { code?: string })?.code;
-      if (code === "auth/invalid-credential" || code === "auth/wrong-password") {
-        setError("Incorrect email or password.");
-      } else if (code === "auth/too-many-requests") {
-        setError("Too many attempts. Please wait and try again.");
-      } else {
-        setError("Login failed. Please try again.");
-      }
+      if (code === "auth/invalid-credential" || code === "auth/wrong-password") setError("Incorrect email or password.");
+      else if (code === "auth/too-many-requests") setError("Too many attempts. Please wait and try again.");
+      else setError("Login failed. Please try again.");
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4"
-         style={{ background: "var(--surface-bg)" }}>
-      <div className="w-full max-w-sm">
+    <div style={{
+      minHeight:"100vh", display:"flex", alignItems:"center",
+      justifyContent:"center", padding:"24px",
+      background:"var(--bg)"
+    }}>
+      <div style={{ width:"100%", maxWidth:"380px" }}>
         {/* Brand */}
-        <div className="text-center mb-8">
-          <h1 className="font-display font-bold text-2xl text-[var(--text-primary)] mb-1">
+        <div style={{ textAlign:"center", marginBottom:"28px" }}>
+          <h1 style={{ fontFamily:"var(--font-playfair)", fontWeight:800, fontSize:"1.6rem", color:"var(--text-1)", marginBottom:"4px" }}>
             {SITE_NAME}
           </h1>
-          <p className="font-sans text-sm text-[var(--text-muted)]">Admin Access</p>
+          <p style={{ fontSize:"0.78rem", color:"var(--text-3)" }}>Admin Access Only</p>
         </div>
 
         {/* Card */}
-        <div className="bg-[var(--surface-card)] border border-[var(--surface-border)]
-                        rounded-xl p-8 shadow-card">
-          <h2 className="font-display font-bold text-xl mb-6 text-[var(--text-primary)]">
+        <div style={{
+          background:"var(--bg-card)", border:"1px solid var(--border)",
+          borderRadius:"16px", padding:"28px",
+          boxShadow:"0 4px 24px rgba(0,0,0,0.08)"
+        }}>
+          <h2 style={{ fontFamily:"var(--font-playfair)", fontWeight:700, fontSize:"1.25rem", color:"var(--text-1)", marginBottom:"20px" }}>
             Sign In
           </h2>
 
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-xs font-sans font-semibold
-                           text-[var(--text-secondary)] mb-1.5 uppercase tracking-wide"
-              >
+          <form onSubmit={handleLogin}>
+            <div style={{ marginBottom:"14px" }}>
+              <label style={{ display:"block", fontSize:"0.7rem", fontWeight:700, textTransform:"uppercase", letterSpacing:"0.07em", color:"var(--text-3)", marginBottom:"6px" }}>
                 Email
               </label>
               <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                autoComplete="email"
-                placeholder="admin@example.com"
-                className="w-full h-11 px-4 rounded-lg text-sm
-                           bg-[var(--surface-bg)] border border-[var(--surface-border)]
-                           text-[var(--text-primary)] placeholder:text-[var(--text-muted)]
-                           focus:outline-none focus:ring-2 focus:ring-[var(--brand-red)]
-                           focus:border-transparent transition"
+                type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+                required autoComplete="email" placeholder="admin@example.com"
+                className="admin-input"
               />
             </div>
 
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-xs font-sans font-semibold
-                           text-[var(--text-secondary)] mb-1.5 uppercase tracking-wide"
-              >
+            <div style={{ marginBottom:"18px" }}>
+              <label style={{ display:"block", fontSize:"0.7rem", fontWeight:700, textTransform:"uppercase", letterSpacing:"0.07em", color:"var(--text-3)", marginBottom:"6px" }}>
                 Password
               </label>
               <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                autoComplete="current-password"
-                placeholder="••••••••"
-                className="w-full h-11 px-4 rounded-lg text-sm
-                           bg-[var(--surface-bg)] border border-[var(--surface-border)]
-                           text-[var(--text-primary)] placeholder:text-[var(--text-muted)]
-                           focus:outline-none focus:ring-2 focus:ring-[var(--brand-red)]
-                           focus:border-transparent transition"
+                type="password" value={password} onChange={(e) => setPassword(e.target.value)}
+                required autoComplete="current-password" placeholder="••••••••"
+                className="admin-input"
               />
             </div>
 
             {error && (
-              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200
-                              dark:border-red-800 rounded-lg px-4 py-3 text-sm
-                              text-red-600 dark:text-red-400 font-sans">
-                {error}
+              <div className="alert alert-error" style={{ marginBottom:"14px" }}>
+                ⚠ {error}
               </div>
             )}
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full h-11 rounded-lg bg-[var(--brand-red)] text-white
-                         font-sans font-semibold text-sm transition-all
-                         hover:bg-[var(--brand-red-dark)] disabled:opacity-60
-                         disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
+            <button type="submit" disabled={loading} className="btn-primary" style={{ width:"100%", justifyContent:"center", height:"42px" }}>
               {loading ? (
-                <>
-                  <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                <span style={{ display:"flex", alignItems:"center", gap:"8px" }}>
+                  <svg style={{ width:"16px", height:"16px", animation:"spin 1s linear infinite" }} viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" opacity="0.25"/>
+                    <path fill="currentColor" opacity="0.75" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
                   </svg>
                   Signing in…
-                </>
-              ) : (
-                "Sign In"
-              )}
+                </span>
+              ) : "Sign In →"}
             </button>
           </form>
         </div>
 
-        <p className="text-center text-xs text-[var(--text-muted)] font-sans mt-6">
-          <a href="/" className="hover:text-[var(--brand-red)] transition-colors">
-            ← Return to website
-          </a>
+        <p style={{ textAlign:"center", marginTop:"20px", fontSize:"0.78rem", color:"var(--text-3)" }}>
+          <Link href="/">← Return to website</Link>
         </p>
       </div>
+
+      <style>{`@keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }`}</style>
     </div>
+  );
+}
+
+function Link({ href, children }: { href: string; children: React.ReactNode }) {
+  return (
+    <a href={href} style={{ color:"var(--brand-red)", textDecoration:"none" }}
+      onMouseEnter={(e) => ((e.target as HTMLElement).style.textDecoration = "underline")}
+      onMouseLeave={(e) => ((e.target as HTMLElement).style.textDecoration = "none")}
+    >{children}</a>
   );
 }

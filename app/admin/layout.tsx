@@ -6,16 +6,14 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen" style={{ background: "var(--surface-bg)" }}>
+    <div className="admin-shell">
       <AdminSidebar />
       <div className="admin-main">
-        <div className="p-4 md:p-8">{children}</div>
+        <div className="admin-content">
+          {children}
+        </div>
       </div>
     </div>
   );

@@ -4,30 +4,27 @@ import { SITE_NAME, SITE_TAGLINE } from "@/lib/constants";
 
 export default function Header() {
   return (
-    <header
-      className="bg-[var(--surface-card)] border-b border-[var(--surface-border)]
-                    sticky top-0 z-30"
-    >
-      <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
-        {/* Logo / Site name */}
-        <Link href="/" className="flex-shrink-0">
-          <h1
-            className="font-display font-bold text-2xl leading-none
-                          text-[var(--text-primary)] hover:text-[var(--brand-red)]
-                          transition-colors"
+    <header className="site-header">
+      <div className="site-header-inner">
+        <Link href="/" style={{ textDecoration:"none", flexShrink:0 }}>
+          <h1 className="site-logo" style={{
+            fontWeight:800, fontSize:"1.4rem", lineHeight:1,
+            color:"var(--text-1)", transition:"color 0.15s"
+          }}
+          onMouseEnter={(e)=>((e.currentTarget as HTMLElement).style.color="var(--brand-red)")}
+          onMouseLeave={(e)=>((e.currentTarget as HTMLElement).style.color="var(--text-1)")}
           >
             {SITE_NAME}
           </h1>
-          <p
-            className="font-sans text-[0.65rem] text-[var(--text-muted)]
-                          tracking-widest uppercase mt-0.5 hidden sm:block"
-          >
+          <p style={{
+            fontSize:"0.6rem", color:"var(--text-3)",
+            letterSpacing:"0.1em", textTransform:"uppercase",
+            marginTop:"2px"
+          }}>
             {SITE_TAGLINE}
           </p>
         </Link>
-
-        {/* Search */}
-        <div className="flex-1 max-w-sm">
+        <div style={{ flex:1, maxWidth:"320px", marginLeft:"auto" }}>
           <SearchBar />
         </div>
       </div>

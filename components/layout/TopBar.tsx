@@ -3,69 +3,45 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { SITE_NAME } from "@/lib/constants";
 
-function ThemeToggle() {
-  const [isDark, setIsDark] = useState(false);
+export default function TopBar() {
+  const [dateStr, setDateStr] = useState("");
+  const [isDark,  setIsDark]  = useState(false);
 
   useEffect(() => {
+    setDateStr(new Date().toLocaleDateString("en-IN", {
+      weekday:"long", year:"numeric", month:"long", day:"numeric"
+    }));
     setIsDark(document.documentElement.classList.contains("dark"));
   }, []);
 
-  const toggle = () => {
-    const root = document.documentElement;
+  const toggleTheme = () => {
     const next = !isDark;
-    root.classList.toggle("dark", next);
+    document.documentElement.classList.toggle("dark", next);
     localStorage.setItem("theme", next ? "dark" : "light");
     setIsDark(next);
   };
 
   return (
-    <button
-      onClick={toggle}
-      aria-label="Toggle dark mode"
-      className="w-7 h-7 rounded-full flex items-center justify-center
-                 bg-[var(--surface-border)] hover:bg-[var(--brand-red)]
-                 text-[var(--text-secondary)] hover:text-white
-                 transition-colors text-sm"
-    >
-      {isDark ? "☀" : "🌙"}
-    </button>
-  );
-}
-
-export default function TopBar() {
-  const [dateStr, setDateStr] = useState("");
-
-  useEffect(() => {
-    setDateStr(
-      new Date().toLocaleDateString("en-IN", {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      })
-    );
-  }, []);
-
-  return (
-    <div
-      className="h-9 border-b border-[var(--surface-border)]
-                    bg-[var(--surface-card)] text-[var(--text-muted)]"
-      style={{ fontSize: "0.72rem" }}
-    >
-      <div className="max-w-7xl mx-auto px-4 h-full flex items-center justify-between">
-        <span className="hidden sm:block font-sans">{dateStr}</span>
-        <span className="font-sans font-semibold tracking-widest uppercase text-[var(--brand-red)]">
+    <div className="topbar">
+      <div className="topbar-inner">
+        <span style={{ display:"none" }} className="md-show">{dateStr}</span>
+        <span style={{
+          fontFamily:"var(--font-playfair)", fontWeight:700,
+          fontSize:"0.78rem", letterSpacing:"0.12em",
+          textTransform:"uppercase", color:"var(--brand-red)"
+        }}>
           {SITE_NAME}
         </span>
-        <div className="flex items-center gap-3">
-          <Link
-            href="/admin/login"
-            className="hover:text-[var(--brand-red)] transition-colors"
-            aria-label="Admin login"
+        <div style={{ display:"flex", alignItems:"center", gap:"10px" }}>
+          <Link href="/admin/login" style={{ color:"var(--text-3)", fontSize:"0.72rem", transition:"color 0.15s" }}
+            onMouseEnter={(e)=>((e.target as HTMLElement).style.color="var(--brand-red)")}
+            onMouseLeave={(e)=>((e.target as HTMLElement).style.color="var(--text-3)")}
           >
             Admin
           </Link>
-          <ThemeToggle />
+          <button onClick={toggleTheme} className="theme-toggle" aria-label="Toggle theme">
+            {isDark ? "☀" : "🌙"}
+          </button>
         </div>
       </div>
     </div>

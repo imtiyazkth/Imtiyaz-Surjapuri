@@ -1,37 +1,45 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-
 export const metadata: Metadata = { title: "404 — Page Not Found" };
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen flex items-center justify-center p-8"
-         style={{ background: "var(--surface-bg)" }}>
-      <div className="text-center max-w-md">
-        <p className="font-display font-bold text-8xl text-[var(--brand-red)] mb-4">
+    <div className="notfound">
+      <div style={{ textAlign:"center", maxWidth:"420px" }}>
+        <div style={{
+          width:"80px", height:"80px", borderRadius:"50%",
+          background:"rgba(196,28,28,0.1)", display:"flex",
+          alignItems:"center", justifyContent:"center",
+          margin:"0 auto 20px", fontSize:"2rem"
+        }}>
+          🔍
+        </div>
+        <p style={{
+          fontFamily:"var(--font-playfair)", fontWeight:800,
+          fontSize:"4.5rem", color:"var(--brand-red)",
+          lineHeight:1, marginBottom:"8px"
+        }}>
           404
         </p>
-        <h1 className="font-display font-bold text-2xl text-[var(--text-primary)] mb-3">
+        <h1 style={{
+          fontFamily:"var(--font-playfair)", fontWeight:700,
+          fontSize:"1.4rem", color:"var(--text-1)", marginBottom:"10px"
+        }}>
           Page not found
         </h1>
-        <p className="font-sans text-[var(--text-muted)] text-sm mb-8">
-          The article or page you're looking for doesn't exist or has been moved.
+        <p style={{ fontSize:"0.88rem", color:"var(--text-3)", marginBottom:"28px", lineHeight:1.6 }}>
+          The article or page you&apos;re looking for doesn&apos;t exist or has been moved.
         </p>
-        <div className="flex gap-3 justify-center">
+        <div style={{ display:"flex", gap:"12px", justifyContent:"center", flexWrap:"wrap" }}>
           <Link
             href="/"
-            className="px-5 py-2.5 rounded-lg bg-[var(--brand-red)] text-white
-                       font-sans text-sm font-semibold hover:bg-[var(--brand-red-dark)]
-                       transition-colors"
+            className="btn-primary"
           >
             Go Home
           </Link>
           <Link
             href="/articles"
-            className="px-5 py-2.5 rounded-lg border border-[var(--surface-border)]
-                       text-[var(--text-secondary)] font-sans text-sm font-semibold
-                       hover:border-[var(--brand-red)] hover:text-[var(--brand-red)]
-                       transition-colors"
+            className="btn-outline"
           >
             Browse Articles
           </Link>
