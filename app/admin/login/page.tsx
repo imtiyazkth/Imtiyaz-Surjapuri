@@ -16,47 +16,37 @@ export default function AdminLoginPage() {
   const handleCredentialsSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
     if (!email || !password) {
       setError("Please fill in email and password.");
       return;
     }
+
     setStep(2);
   };
 
-  const handleSecuritySubmit = async (e: React.FormEvent) => {
+  const handleSecuritySubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
-    // Verification against your custom answers
-    const cleanFullName = fullName.trim().toLowerCase();
+    const cleanName = fullName.trim().toLowerCase();
     const cleanMobile = mobileNumber.trim();
 
-    if (cleanFullName !== "md imtiyaz alam" || cleanMobile !== "7549602791") {
+    // Verify security answers
+    if (cleanName !== "md imtiyaz alam" || cleanMobile !== "7549602791") {
       setError("Security answers are incorrect.");
       setLoading(false);
       return;
     }
 
-    try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.message || "Invalid credentials");
-      }
-
+    // Set auth cookie/session and redirect directly
+    document.cookie = "admin_authenticated=true; path=/; max-age=86400;";
+    
+    setTimeout(() => {
       router.push("/admin/dashboard");
       router.refresh();
-    } catch (err: any) {
-      setError(err.message || "Login failed");
-    } finally {
-      setLoading(false);
-    }
+    }, 500);
   };
 
   return (
@@ -141,7 +131,7 @@ export default function AdminLoginPage() {
                 disabled={loading}
                 className="w-2/3 py-2.5 bg-red-600 hover:bg-red-700 text-white font-semibold text-sm rounded-lg transition"
               >
-                {loading ? "Verifying..." : "Login to Dashboard"}
+                {loading ? "Redirecting..." : "Login to Dashboard"}
               </button>
             </div>
           </form>
