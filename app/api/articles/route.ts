@@ -1,14 +1,29 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/firebase/admin";
 
+export async function GET() {
+  try {
+    const snapshot = await db.collection("articles").orderBy("createdAt", "desc").get();
+    const articles = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    return NextResponse.json({ success: true, articles });
+  } catch (error: any) {
+    console.error("Error fetching articles:", error);
+    // Return empty array instead of throwing 500 error page
+    return NextResponse.json({ success: false, articles: [], error: error?.message }, { status: 200 });
+  }
+}
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();
 
-    // Sanitize YouTube URLs array (ignore invalid or non-YouTube image links)
     const rawYoutubeUrls = body.youtubeUrls || [];
     const validYoutubeUrls = Array.isArray(rawYoutubeUrls)
-      ? rawYoutubeUrls.filter((url: string) => typeof url === "string" && url.includes("youtube.com") || url.includes("youtu.be"))
+      ? rawYoutubeUrls.filter((url: string) => typeof url === "string" && (url.includes("youtube.com") || url.includes("youtu.be")))
       : [];
 
     const articleData = {
@@ -27,18 +42,18 @@ export async function POST(req: Request) {
       updatedAt: new Date().toISOString(),
     };
 
-    // Save to Firestore Collection
     const docRef = await db.collection("articles").add(articleData);
 
     return NextResponse.json({
       success: true,
       id: docRef.id,
-      message: "Article published successfully to Firestore!",
+      slug: articleData.slug,
+      message: "Article saved to Firestore successfully!",
     });
   } catch (error: any) {
-    console.error("Firestore Publish Error:", error);
+    console.error("Firestore Save Error:", error);
     return NextResponse.json(
-      { error: "Failed to publish article", details: error?.message || String(error) },
+      { success: false, error: "Failed to publish article", details: error?.message },
       { status: 500 }
     );
   }
