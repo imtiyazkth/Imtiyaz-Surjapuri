@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { db } from "@/lib/firebase";
-import { collection, query, where, getDocs, doc, getDoc } from "firebase/firestore";
+import { collection, getDocs, doc, getDoc } from "firebase/firestore";
 
 export default function ArticleDetailPage() {
   const params = useParams();
@@ -21,7 +21,7 @@ export default function ArticleDetailPage() {
       try {
         setLoading(true);
 
-        // 1. Check direct Document ID in Firestore
+        // 1. Direct Doc ID Fetch
         const directDocRef = doc(db, "articles", decodedParam);
         const directDocSnap = await getDoc(directDocRef);
 
@@ -31,39 +31,29 @@ export default function ArticleDetailPage() {
           return;
         }
 
-        // 2. Search by 'slug' field
-        const slugQuery = query(collection(db, "articles"), where("slug", "==", decodedParam));
-        const slugSnap = await getDocs(slugQuery);
+        // 2. Fetch All and Find Match
+        const querySnapshot = await getDocs(collection(db, "articles"));
+        let matched: any = null;
 
-        if (!slugSnap.empty) {
-          const docData = slugSnap.docs[0];
-          setArticle({ id: docData.id, ...docData.data() });
-          setLoading(false);
-          return;
-        }
-
-        // 3. Fallback: Search all articles and match by Title or ID
-        const allArticlesSnap = await getDocs(collection(db, "articles"));
-        let matchedDoc: any = null;
-
-        allArticlesSnap.forEach((docItem) => {
-          const data = docItem.data();
-          const docId = docItem.id;
-          const title = data.title || "";
+        querySnapshot.forEach((docSnap) => {
+          const data = docSnap.data();
+          const id = docSnap.id;
           const slug = data.slug || "";
+          const title = data.title || "";
 
           if (
-            docId.toLowerCase() === decodedParam.toLowerCase() ||
-            slug.toLowerCase() === decodedParam.toLowerCase() ||
-            title.toLowerCase() === decodedParam.toLowerCase()
+            id === decodedParam ||
+            slug === decodedParam ||
+            title.toLowerCase() === decodedParam.toLowerCase() ||
+            slug.toLowerCase() === decodedParam.toLowerCase()
           ) {
-            matchedDoc = { id: docId, ...data };
+            matched = { id, ...data };
           }
         });
 
-        setArticle(matchedDoc);
+        setArticle(matched);
       } catch (error) {
-        console.error("Error fetching article:", error);
+        console.error("Firestore read error:", error);
         setArticle(null);
       } finally {
         setLoading(false);
@@ -76,7 +66,7 @@ export default function ArticleDetailPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center p-6">
-        <div className="text-sm text-slate-400 animate-pulse">Loading article content...</div>
+        <div className="text-xs text-slate-400 animate-pulse">Loading article content...</div>
       </div>
     );
   }
@@ -86,7 +76,7 @@ export default function ArticleDetailPage() {
       <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center p-6 text-center">
         <h1 className="text-2xl font-bold text-red-500 mb-2">Article Not Found</h1>
         <p className="text-slate-400 text-xs mb-6 max-w-sm">
-          The requested article could not be found in Firestore.
+          Could not fetch document [{decodedParam}] from Firestore.
         </p>
         <Link href="/" className="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white text-xs rounded-lg font-semibold transition">
           Return Home
@@ -94,6 +84,11 @@ export default function ArticleDetailPage() {
       </div>
     );
   }
+
+  // Fallback if 'content' field is empty string
+  const mainBody = article.content && article.content.trim() !== "" 
+    ? article.content 
+    : article.excerpt || article.description || "No main text content available.";
 
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100 p-6 md:p-12 max-w-3xl mx-auto">
@@ -105,20 +100,14 @@ export default function ArticleDetailPage() {
         {article.title}
       </h1>
 
-      {article.subtitle && (
-        <p className="text-sm text-slate-400 mb-4 italic">
-          {article.subtitle}
-        </p>
-      )}
-
       {article.createdAt && (
         <p className="text-xs text-slate-500 mb-6">
-          Published: {new Date(article.createdAt?.seconds ? article.createdAt.seconds * 1000 : article.createdAt).toLocaleDateString()}
+          Published: {article.createdAt}
         </p>
       )}
 
-      <div className="text-slate-300 leading-relaxed whitespace-pre-wrap text-base border-t border-slate-800 pt-6 space-y-4">
-        {article.content || article.body || article.description || "No text content available for this article."}
+      <div className="text-slate-300 leading-relaxed whitespace-pre-wrap text-base border-t border-slate-800 pt-6">
+        {mainBody}
       </div>
     </main>
   );
