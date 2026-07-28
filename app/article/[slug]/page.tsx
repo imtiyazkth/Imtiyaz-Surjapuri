@@ -19,7 +19,8 @@ export default function ArticleDetailPage() {
     async function fetchArticle() {
       try {
         setLoading(true);
-        // 1. Try fetching by slug field
+
+        // 1. Try querying by 'slug' field
         const q = query(collection(db, "articles"), where("slug", "==", slug));
         const querySnapshot = await getDocs(q);
 
@@ -30,7 +31,7 @@ export default function ArticleDetailPage() {
           return;
         }
 
-        // 2. Fallback: Try fetching directly by Document ID
+        // 2. Fallback: Query directly by Document ID
         const docRef = doc(db, "articles", slug);
         const docSnap = await getDoc(docRef);
 
@@ -53,7 +54,7 @@ export default function ArticleDetailPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center p-6">
-        <div className="text-sm text-slate-400 animate-pulse">Loading article content...</div>
+        <div className="text-xs text-slate-400 animate-pulse">Loading article content...</div>
       </div>
     );
   }
@@ -63,7 +64,7 @@ export default function ArticleDetailPage() {
       <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center p-6 text-center">
         <h1 className="text-2xl font-bold text-red-500 mb-2">Article Not Found</h1>
         <p className="text-slate-400 text-xs mb-6 max-w-sm">
-          The requested article could not be loaded from Firestore. Please verify the document exists in your database.
+          The requested article could not be loaded from Firestore.
         </p>
         <Link href="/" className="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white text-xs rounded-lg font-semibold transition">
           Return Home
