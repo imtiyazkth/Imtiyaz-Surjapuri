@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import SearchBar from "@/components/layout/SearchBar";
 import { SITE_NAME, SITE_TAGLINE } from "@/lib/constants";
