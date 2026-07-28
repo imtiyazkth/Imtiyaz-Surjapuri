@@ -8,11 +8,12 @@ export default function AdminLoginPage() {
   const [step, setStep] = useState<1 | 2>(1);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [secAnswer, setSecAnswer] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [mobileNumber, setMobileNumber] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleCredentialsSubmit = async (e: React.FormEvent) => {
+  const handleCredentialsSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     if (!email || !password) {
@@ -27,16 +28,26 @@ export default function AdminLoginPage() {
     setLoading(true);
     setError("");
 
+    // Verification against your custom answers
+    const cleanFullName = fullName.trim().toLowerCase();
+    const cleanMobile = mobileNumber.trim();
+
+    if (cleanFullName !== "md imtiyaz alam" || cleanMobile !== "7549602791") {
+      setError("Security answers are incorrect.");
+      setLoading(false);
+      return;
+    }
+
     try {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, securityAnswer: secAnswer }),
+        body: JSON.stringify({ email, password }),
       });
 
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.message || "Invalid authentication credentials");
+        throw new Error(data.message || "Invalid credentials");
       }
 
       router.push("/admin/dashboard");
@@ -53,7 +64,7 @@ export default function AdminLoginPage() {
       <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-xl p-8 shadow-2xl">
         <div className="text-center mb-6">
           <h1 className="text-2xl font-bold text-white mb-1">ImtiyazSurjapuri.com</h1>
-          <p className="text-xs text-red-500 font-semibold tracking-wider uppercase">Admin Portal Gateway</p>
+          <p className="text-xs text-red-500 font-semibold tracking-wider uppercase">Admin Portal Verification</p>
         </div>
 
         {error && (
@@ -96,18 +107,28 @@ export default function AdminLoginPage() {
         ) : (
           <form onSubmit={handleSecuritySubmit} className="space-y-4">
             <div>
-              <label className="block text-xs text-slate-400 mb-1">Security Question</label>
-              <p className="text-xs text-slate-300 font-medium mb-2">What is your personal verification key / birth city?</p>
+              <label className="block text-xs text-slate-400 mb-1">What is your Full name?</label>
               <input
                 type="text"
                 required
-                value={secAnswer}
-                onChange={(e) => setSecAnswer(e.target.value)}
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
                 className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded text-white text-sm focus:outline-none focus:border-red-500"
-                placeholder="Enter security answer"
+                placeholder="Enter full name"
               />
             </div>
-            <div className="flex gap-2">
+            <div>
+              <label className="block text-xs text-slate-400 mb-1">What is your mobile number?</label>
+              <input
+                type="text"
+                required
+                value={mobileNumber}
+                onChange={(e) => setMobileNumber(e.target.value)}
+                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded text-white text-sm focus:outline-none focus:border-red-500"
+                placeholder="Enter mobile number"
+              />
+            </div>
+            <div className="flex gap-2 pt-2">
               <button
                 type="button"
                 onClick={() => setStep(1)}
@@ -120,7 +141,7 @@ export default function AdminLoginPage() {
                 disabled={loading}
                 className="w-2/3 py-2.5 bg-red-600 hover:bg-red-700 text-white font-semibold text-sm rounded-lg transition"
               >
-                {loading ? "Authenticating..." : "Login to Dashboard"}
+                {loading ? "Verifying..." : "Login to Dashboard"}
               </button>
             </div>
           </form>
