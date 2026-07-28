@@ -6,7 +6,7 @@ import Link from "next/link";
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
-  // If on login page, do NOT render the admin sidebar/navigation bar
+  // Hide sidebar/header when on login page
   if (pathname === "/admin/login") {
     return <>{children}</>;
   }
