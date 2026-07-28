@@ -21,7 +21,7 @@ export default function ArticleDetailPage() {
       try {
         setLoading(true);
 
-        // 1. Direct Doc ID Fetch
+        // 1. Direct fetch by Document ID
         const directDocRef = doc(db, "articles", decodedParam);
         const directDocSnap = await getDoc(directDocRef);
 
@@ -31,7 +31,7 @@ export default function ArticleDetailPage() {
           return;
         }
 
-        // 2. Fetch All and Find Match
+        // 2. Scan articles list for matching ID or Slug
         const querySnapshot = await getDocs(collection(db, "articles"));
         let matched: any = null;
 
@@ -39,14 +39,7 @@ export default function ArticleDetailPage() {
           const data = docSnap.data();
           const id = docSnap.id;
           const slug = data.slug || "";
-          const title = data.title || "";
-
-          if (
-            id === decodedParam ||
-            slug === decodedParam ||
-            title.toLowerCase() === decodedParam.toLowerCase() ||
-            slug.toLowerCase() === decodedParam.toLowerCase()
-          ) {
+          if (id === decodedParam || slug === decodedParam) {
             matched = { id, ...data };
           }
         });
@@ -54,7 +47,6 @@ export default function ArticleDetailPage() {
         setArticle(matched);
       } catch (error) {
         console.error("Firestore read error:", error);
-        setArticle(null);
       } finally {
         setLoading(false);
       }
@@ -76,7 +68,7 @@ export default function ArticleDetailPage() {
       <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center p-6 text-center">
         <h1 className="text-2xl font-bold text-red-500 mb-2">Article Not Found</h1>
         <p className="text-slate-400 text-xs mb-6 max-w-sm">
-          Could not fetch document [{decodedParam}] from Firestore.
+          Could not retrieve document from Firestore.
         </p>
         <Link href="/" className="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white text-xs rounded-lg font-semibold transition">
           Return Home
@@ -85,29 +77,18 @@ export default function ArticleDetailPage() {
     );
   }
 
-  // Fallback if 'content' field is empty string
-  const mainBody = article.content && article.content.trim() !== "" 
+  const mainContent = article.content && article.content.trim() !== "" 
     ? article.content 
-    : article.excerpt || article.description || "No main text content available.";
+    : article.excerpt || "No body text available.";
 
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100 p-6 md:p-12 max-w-3xl mx-auto">
       <Link href="/" className="inline-block text-xs text-red-400 hover:underline mb-6">
-        ← Back to Articles
+        ← Back to Home
       </Link>
-      
-      <h1 className="text-3xl md:text-4xl font-bold text-white mb-4 leading-tight">
-        {article.title}
-      </h1>
-
-      {article.createdAt && (
-        <p className="text-xs text-slate-500 mb-6">
-          Published: {article.createdAt}
-        </p>
-      )}
-
+      <h1 className="text-3xl font-bold text-white mb-4">{article.title}</h1>
       <div className="text-slate-300 leading-relaxed whitespace-pre-wrap text-base border-t border-slate-800 pt-6">
-        {mainBody}
+        {mainContent}
       </div>
     </main>
   );
