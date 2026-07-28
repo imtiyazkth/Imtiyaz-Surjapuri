@@ -21,7 +21,7 @@ export default function ArticleDetailPage() {
       try {
         setLoading(true);
 
-        // 1. Direct fetch by Document ID
+        // 1. Direct Document ID lookup
         const directDocRef = doc(db, "articles", decodedParam);
         const directDocSnap = await getDoc(directDocRef);
 
@@ -31,7 +31,7 @@ export default function ArticleDetailPage() {
           return;
         }
 
-        // 2. Scan articles list for matching ID or Slug
+        // 2. Scan collection for Slug or ID match
         const querySnapshot = await getDocs(collection(db, "articles"));
         let matched: any = null;
 
@@ -77,6 +77,7 @@ export default function ArticleDetailPage() {
     );
   }
 
+  // Fallback to excerpt if content string is empty
   const mainContent = article.content && article.content.trim() !== "" 
     ? article.content 
     : article.excerpt || "No body text available.";
