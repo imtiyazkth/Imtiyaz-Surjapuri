@@ -1,67 +1,45 @@
-import { NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth/guards";
-import {
-  getPublishedArticles,
-  getAllArticlesAdmin,
-  createArticle,
-  searchArticles,
-} from "@/lib/db/articles";
-import { POSTS_PER_PAGE } from "@/lib/constants";
+import { NextResponse } from "next/server";
+import { db } from "@/lib/firebase/admin";
 
-// GET /api/articles — public paginated list OR admin full list
-export async function GET(request: NextRequest) {
+export async function POST(req: Request) {
   try {
-    const { searchParams } = request.nextUrl;
-    const q = searchParams.get("q");
-    const category = searchParams.get("category") ?? undefined;
-    const tag = searchParams.get("tag") ?? undefined;
-    const limit = Math.min(
-      parseInt(searchParams.get("limit") ?? String(POSTS_PER_PAGE)),
-      50
+    const body = await req.json();
+
+    // Sanitize YouTube URLs array (ignore invalid or non-YouTube image links)
+    const rawYoutubeUrls = body.youtubeUrls || [];
+    const validYoutubeUrls = Array.isArray(rawYoutubeUrls)
+      ? rawYoutubeUrls.filter((url: string) => typeof url === "string" && url.includes("youtube.com") || url.includes("youtu.be"))
+      : [];
+
+    const articleData = {
+      title: body.title || "Untitled Article",
+      slug: body.slug || `article-${Date.now()}`,
+      content: body.content || "",
+      coverImage: body.coverImage || "",
+      excerpt: body.excerpt || "",
+      category: body.category || "General",
+      status: body.status || "published",
+      isFeatured: Boolean(body.isFeatured),
+      isBreaking: Boolean(body.isBreaking),
+      isTrending: Boolean(body.isTrending),
+      youtubeUrls: validYoutubeUrls,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    // Save to Firestore Collection
+    const docRef = await db.collection("articles").add(articleData);
+
+    return NextResponse.json({
+      success: true,
+      id: docRef.id,
+      message: "Article published successfully to Firestore!",
+    });
+  } catch (error: any) {
+    console.error("Firestore Publish Error:", error);
+    return NextResponse.json(
+      { error: "Failed to publish article", details: error?.message || String(error) },
+      { status: 500 }
     );
-    const admin = searchParams.get("admin") === "1";
-
-    if (admin) {
-      const authError = await requireAdmin(request);
-      if (authError) return authError;
-      const status = searchParams.get("status") ?? undefined;
-      const articles = await getAllArticlesAdmin({ status, limit });
-      return NextResponse.json({ articles });
-    }
-
-    if (q) {
-      const results = await searchArticles(q, limit);
-      return NextResponse.json({ articles: results });
-    }
-
-    const articles = await getPublishedArticles({ limit, category, tag });
-    return NextResponse.json({ articles });
-  } catch (err) {
-    console.error("GET /api/articles error:", err);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
-  }
-}
-
-// POST /api/articles — create (admin only)
-export async function POST(request: NextRequest) {
-  const authError = await requireAdmin(request);
-  if (authError) return authError;
-
-  try {
-    const body = await request.json();
-
-    // Basic validation
-    if (!body.title || !body.contentHtml) {
-      return NextResponse.json(
-        { error: "title and contentHtml are required" },
-        { status: 400 }
-      );
-    }
-
-    const { id, slug } = await createArticle(body);
-    return NextResponse.json({ id, slug }, { status: 201 });
-  } catch (err) {
-    console.error("POST /api/articles error:", err);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }
