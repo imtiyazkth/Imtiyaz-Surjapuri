@@ -1,20 +1,28 @@
 import * as admin from 'firebase-admin';
 
-if (!admin.apps.length) {
-  const privateKey = process.env.FIREBASE_PRIVATE_KEY
-    ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n')
-    : undefined;
+const projectId = process.env.FIREBASE_PROJECT_ID || process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "imtiyaz-surjapuri";
+const clientEmail = process.env.FIREBASE_CLIENT_EMAIL || "firebase-adminsdk-fbsvc@imtiyaz-surjapuri.iam.gserviceaccount.com";
+const privateKey = process.env.FIREBASE_PRIVATE_KEY 
+  ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n')
+  : undefined;
 
-  admin.initializeApp({
-    credential: admin.credential.cert({
-      projectId: process.env.FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey: privateKey,
-    }),
-  });
+if (!admin.apps.length) {
+  if (projectId && clientEmail && privateKey) {
+    admin.initializeApp({
+      credential: admin.credential.cert({
+        projectId,
+        clientEmail,
+        privateKey,
+      }),
+    });
+  } else {
+    // Build-time fallback if env variables are missing during prerender
+    admin.initializeApp({
+      projectId: projectId || "imtiyaz-surjapuri",
+    });
+  }
 }
 
-// Exports expected by your routes
 export const adminDb = admin.firestore();
 export const adminAuth = admin.auth();
 export const db = adminDb;
