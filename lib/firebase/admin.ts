@@ -1,22 +1,29 @@
 import * as admin from "firebase-admin";
 
+function formatPrivateKey(key: string | undefined) {
+  if (!key) return undefined;
+  // Handle double escaped newlines and literal quotes
+  return key.replace(/\\n/g, "\n").replace(/^"|"$/g, "");
+}
+
 if (!admin.apps.length) {
   try {
-    const privateKey = process.env.FIREBASE_ADMIN_PRIVATE_KEY
-      ? process.env.FIREBASE_ADMIN_PRIVATE_KEY.replace(/\\n/g, "\n")
-      : undefined;
+    const rawKey = process.env.FIREBASE_ADMIN_PRIVATE_KEY;
+    const privateKey = formatPrivateKey(rawKey);
+    const clientEmail = process.env.FIREBASE_ADMIN_CLIENT_EMAIL;
+    const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || process.env.FIREBASE_ADMIN_PROJECT_ID || "imtiyaz-site";
 
-    if (process.env.FIREBASE_ADMIN_CLIENT_EMAIL && privateKey) {
+    if (clientEmail && privateKey) {
       admin.initializeApp({
         credential: admin.credential.cert({
-          projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || process.env.FIREBASE_ADMIN_PROJECT_ID,
-          clientEmail: process.env.FIREBASE_ADMIN_CLIENT_EMAIL,
-          privateKey: privateKey,
+          projectId,
+          clientEmail,
+          privateKey,
         }),
       });
     } else {
       admin.initializeApp({
-        projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "imtiyaz-site",
+        projectId,
       });
     }
   } catch (error) {
