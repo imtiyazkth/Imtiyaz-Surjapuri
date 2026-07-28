@@ -1,4 +1,3 @@
-"use client";
 import { getPublishedArticles } from "@/lib/db/articles";
 import { getAllCategories } from "@/lib/db/categories";
 import ArticleCard from "@/components/article/ArticleCard";
