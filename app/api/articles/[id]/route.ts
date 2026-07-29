@@ -1,55 +1,41 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth/guards";
-import {
-  getArticleById,
-  updateArticle,
-  deleteArticle,
-} from "@/lib/db/articles";
+import { adminDb } from "@/lib/firebase/admin";
 
-interface Params {
-  params: Promise<{ id: string }>;
-}
+interface Params { params: Promise<{ id: string }>; }
 
-// GET /api/articles/[id] — admin only
-export async function GET(request: NextRequest, { params }: Params) {
-  const authError = await requireAdmin(request);
-  if (authError) return authError;
-
-  const { id } = await params;
-  const article = await getArticleById(id);
-  if (!article) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
+export async function GET(_req: NextRequest, { params }: Params) {
+  try {
+    const { id } = await params;
+    const doc = await adminDb.collection("articles").doc(id).get();
+    if (!doc.exists) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+    return NextResponse.json({ article: { id: doc.id, ...doc.data() } });
+  } catch (e: unknown) {
+    return NextResponse.json({ error: (e as Error).message }, { status: 500 });
   }
-  return NextResponse.json({ article });
 }
 
-// PUT /api/articles/[id] — update (admin only)
 export async function PUT(request: NextRequest, { params }: Params) {
-  const authError = await requireAdmin(request);
-  if (authError) return authError;
-
-  const { id } = await params;
   try {
+    const { id } = await params;
     const body = await request.json();
-    await updateArticle(id, body);
+    await adminDb.collection("articles").doc(id).update({
+      ...body,
+      updatedAt: new Date().toISOString(),
+    });
     return NextResponse.json({ success: true });
-  } catch (err) {
-    console.error("PUT /api/articles/[id] error:", err);
-    return NextResponse.json({ error: "Update failed" }, { status: 500 });
+  } catch (e: unknown) {
+    return NextResponse.json({ error: (e as Error).message }, { status: 500 });
   }
 }
 
-// DELETE /api/articles/[id] — delete (admin only)
-export async function DELETE(request: NextRequest, { params }: Params) {
-  const authError = await requireAdmin(request);
-  if (authError) return authError;
-
-  const { id } = await params;
+export async function DELETE(_req: NextRequest, { params }: Params) {
   try {
-    await deleteArticle(id);
+    const { id } = await params;
+    await adminDb.collection("articles").doc(id).delete();
     return NextResponse.json({ success: true });
-  } catch (err) {
-    console.error("DELETE /api/articles/[id] error:", err);
-    return NextResponse.json({ error: "Delete failed" }, { status: 500 });
+  } catch (e: unknown) {
+    return NextResponse.json({ error: (e as Error).message }, { status: 500 });
   }
 }

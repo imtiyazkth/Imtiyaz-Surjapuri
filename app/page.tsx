@@ -7,177 +7,139 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import TopBar from "@/components/layout/TopBar";
 
-// ── Types (inline — avoids server-only type imports) ──────────
 interface Article {
-  id: string;
-  slug: string;
-  title: string;
-  excerpt: string;
-  coverImage?: string;
-  coverImageAlt?: string;
-  primaryCategory: string;
-  catColor?: string;
-  author: string;
-  readTime: string;
-  publishedAt: string | null;
-  viewCount: number;
-  featured: boolean;
-  breaking: boolean;
-  trending: boolean;
-  tags: string[];
-  categories: string[];
+  id: string; slug: string; title: string; excerpt?: string;
+  coverImage?: string; coverImageAlt?: string;
+  primaryCategory: string; catColor?: string;
+  author: string; readTime: string;
+  publishedAt?: string | null;
+  viewCount?: number;
+  featured?: boolean; breaking?: boolean; trending?: boolean;
+  categories?: string[]; tags?: string[];
 }
 
-// ── Helpers ────────────────────────────────────────────────────
-function timeAgo(raw: string | null): string {
+const CATEGORIES = [
+  "Analysis","Breaking News","Opinion","Politics","Economy",
+  "Technology","Education","Social Issues","World","Blog",
+];
+
+function timeAgo(raw?: string | null): string {
   if (!raw) return "";
   try {
     const ms = Date.now() - new Date(raw).getTime();
-    const mins  = Math.floor(ms / 60000);
-    const hours = Math.floor(ms / 3600000);
-    const days  = Math.floor(ms / 86400000);
-    if (mins < 60)  return `${mins}m ago`;
-    if (hours < 24) return `${hours}h ago`;
-    return `${days}d ago`;
+    const h = Math.floor(ms / 3600000);
+    const d = Math.floor(ms / 86400000);
+    if (ms < 3600000) return `${Math.floor(ms / 60000)}m ago`;
+    if (h < 24) return `${h}h ago`;
+    return `${d}d ago`;
   } catch { return ""; }
 }
 
-// ── Article Card (inline minimal version) ─────────────────────
-function Card({ article, large = false }: { article: Article; large?: boolean }) {
+// ── Article Card ──────────────────────────────────────────────
+function ArticleCard({ article, large = false }: { article: Article; large?: boolean }) {
   const href  = `/articles/${article.slug}`;
   const color = article.catColor ?? "#C41C1C";
   const date  = timeAgo(article.publishedAt);
 
   if (large) {
     return (
-      <article className="group relative overflow-hidden rounded-xl min-h-[360px] flex flex-col justify-end bg-gray-900">
-        {article.coverImage && (
-          <Image
-            src={article.coverImage}
-            alt={article.coverImageAlt || article.title}
-            fill
-            className="object-cover opacity-70 group-hover:opacity-80 transition-opacity"
-            priority
-            sizes="(max-width:768px) 100vw, 60vw"
-          />
-        )}
-        <div className="relative z-10 p-5 bg-gradient-to-t from-black/90 via-black/50 to-transparent">
-          <div className="flex items-center gap-2 mb-2 flex-wrap">
-            {article.breaking && (
-              <span className="px-2 py-0.5 rounded text-[0.6rem] font-bold uppercase tracking-wider bg-red-600 text-white">
-                Breaking
+      <Link href={href} style={{ display:"block", textDecoration:"none" }}>
+        <article style={{
+          position:"relative", borderRadius:"14px", overflow:"hidden",
+          minHeight:"360px", background:"#111",
+          display:"flex", flexDirection:"column", justifyContent:"flex-end"
+        }}>
+          {article.coverImage && (
+            <Image src={article.coverImage} alt={article.coverImageAlt||article.title}
+              fill priority sizes="(max-width:768px) 100vw, 60vw"
+              style={{ objectFit:"cover", opacity:0.7 }} />
+          )}
+          <div style={{
+            position:"relative", zIndex:1, padding:"20px",
+            background:"linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.4) 70%, transparent 100%)"
+          }}>
+            <div style={{ display:"flex", gap:"6px", marginBottom:"8px", flexWrap:"wrap" }}>
+              {article.breaking && (
+                <span className="cat-pill" style={{ background:color, color:"#fff", border:"none" }}>Breaking</span>
+              )}
+              <span className="cat-pill" style={{ background:`${color}30`, color:"#fff", borderColor:`${color}60` }}>
+                {article.primaryCategory}
               </span>
-            )}
-            <span
-              className="px-2 py-0.5 rounded text-[0.6rem] font-bold uppercase tracking-wider"
-              style={{ background: `${color}25`, color, border: `1px solid ${color}50` }}
-            >
-              {article.primaryCategory}
-            </span>
-          </div>
-          <Link href={href}>
-            <h2 className="font-display font-bold text-white text-xl leading-tight mb-2 group-hover:underline decoration-red-500 underline-offset-3 line-clamp-3">
+            </div>
+            <h2 style={{
+              fontFamily:"var(--font-playfair)", fontWeight:800,
+              color:"#fff", fontSize:"clamp(1.1rem,3vw,1.5rem)",
+              lineHeight:1.25, marginBottom:"8px"
+            }}>
               {article.title}
             </h2>
-          </Link>
-          <p className="text-white/70 text-sm font-sans line-clamp-2 mb-3">{article.excerpt}</p>
-          <div className="flex items-center gap-2 text-white/60 text-xs font-sans">
-            <span>{article.author}</span>
-            <span>·</span><span>{date}</span>
-            <span>·</span><span>{article.readTime} read</span>
+            {article.excerpt && (
+              <p style={{ color:"rgba(255,255,255,0.75)", fontSize:"0.88rem", marginBottom:"10px",
+                display:"-webkit-box", WebkitLineClamp:2, WebkitBoxOrient:"vertical", overflow:"hidden"
+              }}>{article.excerpt}</p>
+            )}
+            <div style={{ display:"flex", gap:"10px", color:"rgba(255,255,255,0.65)", fontSize:"0.75rem" }}>
+              <span>{article.author}</span>
+              {date && <><span>·</span><span>{date}</span></>}
+              <span>·</span><span>{article.readTime}</span>
+            </div>
           </div>
-        </div>
-      </article>
+        </article>
+      </Link>
     );
   }
 
   return (
-    <article className="group flex flex-col rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:shadow-lg transition-shadow">
+    <article className="a-card">
       {article.coverImage && (
-        <Link href={href} className="block overflow-hidden relative" style={{ paddingTop: "58%" }}>
-          <Image
-            src={article.coverImage}
-            alt={article.coverImageAlt || article.title}
-            fill
-            className="object-cover group-hover:scale-105 transition-transform duration-300"
-            sizes="(max-width:640px) 100vw,(max-width:1024px) 50vw,33vw"
-          />
+        <Link href={href} className="a-card-img" style={{ display:"block" }}>
+          <Image src={article.coverImage} alt={article.coverImageAlt||article.title}
+            fill sizes="(max-width:640px) 100vw,(max-width:1024px) 50vw,33vw"
+            style={{ objectFit:"cover" }} />
+          {article.trending && (
+            <span className="cat-pill" style={{
+              position:"absolute", top:"8px", right:"8px",
+              background:"#B8860B", color:"#fff", border:"none"
+            }}>🔥 Trending</span>
+          )}
         </Link>
       )}
-      <div className="flex flex-col flex-1 p-4">
-        <div className="flex items-center gap-2 mb-2 flex-wrap">
+      <div className="a-card-body">
+        <div style={{ display:"flex", gap:"6px", flexWrap:"wrap" }}>
           {article.breaking && (
-            <span className="px-2 py-0.5 rounded text-[0.6rem] font-bold uppercase tracking-wider bg-red-600 text-white">
-              Breaking
-            </span>
+            <span className="cat-pill" style={{ background:color, color:"#fff", border:"none" }}>Breaking</span>
           )}
-          {article.trending && (
-            <span className="px-2 py-0.5 rounded text-[0.6rem] font-bold uppercase bg-amber-500 text-white">
-              🔥 Trending
-            </span>
-          )}
-          <span
-            className="px-2 py-0.5 rounded text-[0.6rem] font-bold uppercase tracking-wider"
-            style={{ background: `${color}20`, color, border: `1px solid ${color}40` }}
-          >
+          <span className="cat-pill" style={{ background:`${color}20`, color, borderColor:`${color}50` }}>
             {article.primaryCategory}
           </span>
         </div>
-        <Link href={href} className="flex-1">
-          <h2 className="font-display font-bold text-gray-900 dark:text-white leading-snug text-[1rem] mb-2 line-clamp-3 group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors">
-            {article.title}
-          </h2>
-          <p className="text-gray-500 dark:text-gray-400 text-sm line-clamp-2 font-sans">
-            {article.excerpt}
-          </p>
-        </Link>
-        <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between text-xs text-gray-400 font-sans">
-          <span className="font-medium text-gray-600 dark:text-gray-300">{article.author}</span>
-          <div className="flex items-center gap-2">
-            <span>{date}</span>
-            <span>·</span>
-            <span>{article.readTime}</span>
-          </div>
+        <Link href={href}><h2 className="a-card-title">{article.title}</h2></Link>
+        {article.excerpt && <p className="a-card-excerpt">{article.excerpt}</p>}
+        <div className="a-card-meta">
+          <span style={{ fontWeight:600, color:"var(--text-2)" }}>{article.author}</span>
+          {date && <><span>·</span><span>{date}</span></>}
+          <span>·</span><span>{article.readTime}</span>
         </div>
       </div>
     </article>
   );
 }
 
-// ── Skeleton loader ────────────────────────────────────────────
-function Skeleton() {
+// ── Breaking Ticker ───────────────────────────────────────────
+function Ticker({ items }: { items: Article[] }) {
+  if (!items.length) return null;
+  const doubled = [...items, ...items];
   return (
-    <div className="rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800 animate-pulse">
-      <div className="bg-gray-200 dark:bg-gray-800 h-48 w-full" />
-      <div className="p-4 space-y-3">
-        <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-20" />
-        <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-full" />
-        <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-4/5" />
-        <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2 mt-4" />
+    <div className="ticker-wrap">
+      <div className="ticker-label">
+        <span className="ticker-dot" />
+        <span>Breaking</span>
       </div>
-    </div>
-  );
-}
-
-// ── Breaking ticker (client, no server data needed) ────────────
-function Ticker({ articles }: { articles: Article[] }) {
-  if (!articles.length) return null;
-  const items = [...articles, ...articles];
-  return (
-    <div className="bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800 flex overflow-hidden h-10">
-      <div className="flex-shrink-0 flex items-center gap-2 px-3 bg-red-600 text-white min-w-[110px]">
-        <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
-        <span className="text-xs font-bold uppercase tracking-widest whitespace-nowrap">Breaking</span>
-      </div>
-      <div className="flex-1 overflow-hidden flex items-center">
-        <div className="flex items-center gap-0 whitespace-nowrap" style={{ animation: "ticker-scroll 50s linear infinite" }}>
-          {items.map((a, i) => (
-            <Link
-              key={`${a.id}-${i}`}
-              href={`/articles/${a.slug}`}
-              className="flex-shrink-0 flex items-center gap-2 px-5 text-sm text-gray-700 dark:text-gray-300 hover:text-red-600 transition-colors"
-            >
-              <span className="text-red-600 font-bold">●</span>
+      <div style={{ flex:1, overflow:"hidden", display:"flex", alignItems:"center" }}>
+        <div className="ticker-track">
+          {doubled.map((a, i) => (
+            <Link key={`${a.id}-${i}`} href={`/articles/${a.slug}`} className="ticker-item">
+              <span style={{ color:"var(--brand-red)", fontWeight:900, fontSize:"0.5rem" }}>●</span>
               {a.title}
             </Link>
           ))}
@@ -187,194 +149,176 @@ function Ticker({ articles }: { articles: Article[] }) {
   );
 }
 
-// ── Category pill navigation ───────────────────────────────────
-const CATEGORIES = [
-  "Analysis","Breaking News","Opinion","Politics","Economy",
-  "Technology","Education","Social Issues","World","Blog",
-];
+// ── Skeleton ──────────────────────────────────────────────────
+function Skeleton() {
+  return (
+    <div style={{ borderRadius:"12px", overflow:"hidden", border:"1px solid var(--border)" }}>
+      <div className="skeleton" style={{ height:"200px" }} />
+      <div style={{ padding:"14px", display:"flex", flexDirection:"column", gap:"10px" }}>
+        <div className="skeleton" style={{ height:"12px", width:"60px" }} />
+        <div className="skeleton" style={{ height:"16px" }} />
+        <div className="skeleton" style={{ height:"16px", width:"80%" }} />
+        <div className="skeleton" style={{ height:"12px", width:"40%", marginTop:"8px" }} />
+      </div>
+    </div>
+  );
+}
 
-// ══════════════════════════════════════════════════════════════
-//  MAIN PAGE
-// ══════════════════════════════════════════════════════════════
+// ── Main Page ─────────────────────────────────────────────────
 export default function HomePage() {
-  const [articles,  setArticles]  = useState<Article[]>([]);
-  const [loading,   setLoading]   = useState(true);
-  const [error,     setError]     = useState("");
-  const [activeTab, setActiveTab] = useState("All");
+  const [articles,   setArticles]   = useState<Article[]>([]);
+  const [loading,    setLoading]    = useState(true);
+  const [error,      setError]      = useState("");
+  const [activeTab,  setActiveTab]  = useState("All");
 
   useEffect(() => {
-    async function fetchArticles() {
-      try {
-        // Fetch from the API route — no Admin SDK on client
-        const res = await fetch("/api/articles?limit=18");
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
-        setArticles(data.articles ?? []);
-      } catch (err) {
-        console.error("Failed to fetch articles:", err);
-        setError("Could not load articles. Please refresh the page.");
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchArticles();
+    fetch("/api/articles?limit=20")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.articles) setArticles(d.articles);
+        else setError("Could not load articles.");
+      })
+      .catch(() => setError("Could not load articles. Please refresh the page."))
+      .finally(() => setLoading(false));
   }, []);
 
-  // Filter by active category tab
-  const filtered =
-    activeTab === "All"
-      ? articles
-      : articles.filter((a) =>
-          a.primaryCategory === activeTab ||
-          a.categories?.includes(activeTab.toLowerCase().replace(/ /g, "-"))
-        );
-
-  const featured  = articles.filter((a) => a.featured).slice(0, 1);
-  const breaking  = articles.filter((a) => a.breaking).slice(0, 5);
-  const mainFeed  = activeTab === "All" ? articles.slice(0, 15) : filtered;
+  const breaking = articles.filter((a) => a.breaking);
+  const featured = articles.filter((a) => a.featured);
+  const mainFeed = activeTab === "All"
+    ? articles
+    : articles.filter((a) =>
+        a.primaryCategory === activeTab ||
+        a.categories?.some((c) => c.toLowerCase().replace(/\s+/g,"-") === activeTab.toLowerCase().replace(/\s+/g,"-"))
+      );
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-950">
+    <div style={{ minHeight:"100vh", display:"flex", flexDirection:"column", background:"var(--bg)" }}>
       <TopBar />
       <Header />
 
       {/* Breaking ticker */}
-      {!loading && breaking.length > 0 && <Ticker articles={breaking} />}
+      {!loading && breaking.length > 0 && <Ticker items={breaking} />}
 
       {/* Category nav */}
-      <nav className="bg-red-600 text-white overflow-x-auto">
-        <div className="max-w-7xl mx-auto px-4 flex items-center gap-0">
+      <nav className="site-nav">
+        <div className="site-nav-inner">
           {["All", ...CATEGORIES].map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setActiveTab(cat)}
-              className={`flex-shrink-0 px-3.5 py-2.5 text-xs font-bold uppercase tracking-wide whitespace-nowrap transition-colors ${
-                activeTab === cat
-                  ? "bg-red-800 text-white"
-                  : "text-white/80 hover:bg-white/10 hover:text-white"
-              }`}
-            >
+            <button key={cat} onClick={() => setActiveTab(cat)}
+              className={`nav-link${activeTab === cat ? " active" : ""}`}>
               {cat}
             </button>
           ))}
-          <Link
-            href="/articles"
-            className="flex-shrink-0 ml-auto px-3.5 py-2.5 text-xs font-bold uppercase tracking-wide text-white/80 hover:text-white hover:bg-white/10 whitespace-nowrap"
-          >
+          <Link href="/articles" className="nav-link" style={{ marginLeft:"auto" }}>
             All Articles →
           </Link>
         </div>
       </nav>
 
-      <main className="flex-1 max-w-7xl mx-auto w-full px-4 py-8">
+      <main style={{ flex:1 }}>
+        <div className="main-container">
 
-        {/* Error state */}
-        {error && (
-          <div className="mb-6 p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 text-sm font-sans">
-            {error}
-          </div>
-        )}
+          {/* Error banner */}
+          {error && (
+            <div className="alert alert-error" style={{ marginBottom:"20px" }}>{error}</div>
+          )}
 
-        {/* Loading skeleton grid */}
-        {loading && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} />)}
-          </div>
-        )}
-
-        {!loading && !error && (
-          <>
-            {/* ── Hero section ─────────────────────────── */}
-            {activeTab === "All" && featured.length > 0 && (
-              <section className="mb-10">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                  <div className="md:col-span-2">
-                    <Card article={featured[0]} large />
-                  </div>
-                  <div className="flex flex-col gap-4">
-                    {articles
-                      .filter((a) => !a.featured)
-                      .slice(0, 3)
-                      .map((a) => (
-                        <article key={a.id} className="flex gap-3 items-start p-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:border-red-300 transition-colors group">
-                          {a.coverImage && (
-                            <Link href={`/articles/${a.slug}`} className="flex-shrink-0">
-                              <Image
-                                src={a.coverImage}
-                                alt={a.title}
-                                width={84}
-                                height={68}
-                                className="rounded-lg object-cover w-[84px] h-[68px]"
-                              />
-                            </Link>
-                          )}
-                          <div className="flex-1 min-w-0">
-                            <span
-                              className="text-[0.6rem] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded"
-                              style={{ background: `${a.catColor ?? "#C41C1C"}20`, color: a.catColor ?? "#C41C1C" }}
-                            >
-                              {a.primaryCategory}
-                            </span>
-                            <Link href={`/articles/${a.slug}`}>
-                              <h3 className="font-display font-bold text-sm text-gray-900 dark:text-white mt-1 line-clamp-2 group-hover:text-red-600 transition-colors">
-                                {a.title}
-                              </h3>
-                            </Link>
-                            <p className="text-xs text-gray-400 font-sans mt-1">{timeAgo(a.publishedAt)} · {a.readTime}</p>
-                          </div>
-                        </article>
-                      ))}
-                  </div>
-                </div>
-              </section>
-            )}
-
-            {/* ── Section label ────────────────────────── */}
-            <div className="flex items-center gap-3 mb-6">
-              <span className="w-1 h-6 bg-red-600 rounded-full" />
-              <h2 className="font-display font-bold text-xl text-gray-900 dark:text-white">
-                {activeTab === "All" ? "Latest Articles" : activeTab}
-              </h2>
-              <div className="flex-1 border-t border-gray-200 dark:border-gray-800" />
-              <Link href="/articles" className="text-xs text-red-600 hover:underline whitespace-nowrap font-sans">
-                See all →
-              </Link>
+          {/* Loading */}
+          {loading && (
+            <div className="articles-grid">
+              {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} />)}
             </div>
+          )}
 
-            {/* ── Main article grid ────────────────────── */}
-            {mainFeed.length === 0 ? (
-              <div className="py-20 text-center">
-                <p className="text-gray-500 dark:text-gray-400 font-sans text-base">
-                  No articles in this category yet.
-                </p>
-                <button
-                  onClick={() => setActiveTab("All")}
-                  className="mt-4 text-red-600 hover:underline font-sans text-sm"
-                >
-                  ← Show all articles
-                </button>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {mainFeed.map((article) => (
-                  <Card key={article.id} article={article} />
-                ))}
-              </div>
-            )}
+          {!loading && !error && (
+            <>
+              {/* Hero section — featured article + sidebar */}
+              {activeTab === "All" && featured.length > 0 && (
+                <section style={{ marginBottom:"36px" }}>
+                  <div className="hero-grid">
+                    {/* Main featured */}
+                    <div>
+                      <ArticleCard article={featured[0]} large />
+                    </div>
+                    {/* Sidebar — next 3 articles */}
+                    <div style={{ display:"flex", flexDirection:"column", gap:"12px" }}>
+                      {articles.filter((a) => !a.featured).slice(0, 3).map((a) => {
+                        const c = a.catColor ?? "#C41C1C";
+                        return (
+                          <Link key={a.id} href={`/articles/${a.slug}`}
+                            style={{ textDecoration:"none" }}
+                          >
+                            <div className="a-horiz">
+                              {a.coverImage && (
+                                <div className="a-horiz-img">
+                                  <Image src={a.coverImage} alt={a.title}
+                                    width={84} height={68} style={{ objectFit:"cover", width:"100%", height:"100%" }} />
+                                </div>
+                              )}
+                              <div style={{ flex:1, minWidth:0 }}>
+                                <span className="cat-pill" style={{ background:`${c}20`, color:c, borderColor:`${c}50` }}>
+                                  {a.primaryCategory}
+                                </span>
+                                <p className="a-horiz-title">{a.title}</p>
+                                <p style={{ fontSize:"0.72rem", color:"var(--text-3)", marginTop:"4px" }}>
+                                  {timeAgo(a.publishedAt)} · {a.readTime}
+                                </p>
+                              </div>
+                            </div>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </section>
+              )}
 
-            {/* ── Load more button ─────────────────────── */}
-            {mainFeed.length >= 15 && (
-              <div className="mt-10 text-center">
-                <Link
-                  href="/articles"
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-red-600 text-white font-sans text-sm font-semibold hover:bg-red-700 transition-colors"
-                >
-                  View All Articles →
+              {/* Section label */}
+              <div className="section-divider">
+                <span className="section-bar" />
+                <span className="section-label">
+                  {activeTab === "All" ? "Latest Articles" : activeTab}
+                </span>
+                <span className="section-line" />
+                <Link href="/articles"
+                  style={{ fontSize:"0.78rem", color:"var(--brand-red)", whiteSpace:"nowrap" }}>
+                  See all →
                 </Link>
               </div>
-            )}
-          </>
-        )}
+
+              {/* Empty state */}
+              {mainFeed.length === 0 && (
+                <div style={{ padding:"48px 0", textAlign:"center" }}>
+                  <p style={{ color:"var(--text-3)", marginBottom:"12px" }}>
+                    No articles in this category yet.
+                  </p>
+                  <button onClick={() => setActiveTab("All")}
+                    style={{ background:"none", border:"none", color:"var(--brand-red)",
+                      cursor:"pointer", textDecoration:"underline", fontSize:"0.85rem" }}>
+                    ← Show all articles
+                  </button>
+                </div>
+              )}
+
+              {/* Articles grid */}
+              {mainFeed.length > 0 && (
+                <div className="articles-grid">
+                  {mainFeed.slice(0, 15).map((a) => (
+                    <ArticleCard key={a.id} article={a} />
+                  ))}
+                </div>
+              )}
+
+              {/* View all button */}
+              {mainFeed.length >= 10 && (
+                <div style={{ textAlign:"center", marginTop:"32px" }}>
+                  <Link href="/articles" className="btn-primary">
+                    View All Articles →
+                  </Link>
+                </div>
+              )}
+            </>
+          )}
+        </div>
       </main>
 
       <Footer />
