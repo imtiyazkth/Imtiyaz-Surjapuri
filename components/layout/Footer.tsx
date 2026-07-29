@@ -2,7 +2,6 @@
 import Link from "next/link";
 import { SITE_NAME, SITE_URL } from "@/lib/constants";
 
-// Categories is optional — homepage renders Footer without server data
 const DEFAULT_CATEGORIES = [
   { slug: "analysis",      name: "Analysis" },
   { slug: "breaking-news", name: "Breaking News" },
@@ -21,39 +20,41 @@ export default function Footer({ categories }: FooterProps) {
   const year = new Date().getFullYear();
   const cats = categories ?? DEFAULT_CATEGORIES;
 
+  const SOCIALS = [
+    { href: "https://www.facebook.com/ImtiyaSurjapuri",   label: "Facebook",  icon: "f",  color: "#1877F2" },
+    { href: "https://www.instagram.com/ImtiyazSurjapuri", label: "Instagram", icon: "📸", color: "#E1306C" },
+    { href: "https://x.com/Imtiyazkth",                   label: "X",         icon: "𝕏",  color: "#000"    },
+    { href: "https://youtube.com/@imtiyazvedio",           label: "YouTube",   icon: "▶",  color: "#FF0000" },
+  ];
+
   return (
-    <footer className="border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 mt-12">
-      <div className="max-w-7xl mx-auto px-4 py-10">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+    <footer style={{ background:"var(--bg-card)", borderTop:"1px solid var(--border)", marginTop:"48px" }}>
+      <div style={{ maxWidth:"1280px", margin:"0 auto", padding:"36px 16px 20px" }}>
+        <div className="footer-grid" style={{ marginBottom:"28px" }}>
           {/* Brand */}
-          <div className="lg:col-span-2">
+          <div style={{ gridColumn:"span 2" }}>
             <Link href="/">
-              <h2 className="font-display font-bold text-xl text-gray-900 dark:text-white mb-2">
+              <h2 style={{ fontFamily:"var(--font-playfair)", fontWeight:800, fontSize:"1.2rem", color:"var(--text-1)", marginBottom:"8px" }}>
                 {SITE_NAME}
               </h2>
             </Link>
-            <p className="font-sans text-sm text-gray-500 dark:text-gray-400 leading-relaxed max-w-xs">
-              Independent journalism, analysis, and commentary covering India,
-              the Gulf, and the world.
+            <p style={{ fontSize:"0.83rem", color:"var(--text-3)", lineHeight:1.6, maxWidth:"280px", marginBottom:"16px" }}>
+              Independent journalism, analysis, and commentary covering India, the Gulf, and the world.
             </p>
-            {/* Social links */}
-            <div className="flex gap-3 mt-4">
-              {[
-                { href: "https://twitter.com/", label: "X", icon: "𝕏" },
-                { href: "https://facebook.com/", label: "Facebook", icon: "f" },
-                { href: "https://youtube.com/", label: "YouTube", icon: "▶" },
-                { href: "https://wa.me/", label: "WhatsApp", icon: "💬" },
-              ].map((s) => (
-                <a
-                  key={s.label}
-                  href={s.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
+            {/* Social icons */}
+            <div style={{ display:"flex", gap:"10px", flexWrap:"wrap" }}>
+              {SOCIALS.map((s) => (
+                <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer"
                   aria-label={s.label}
-                  className="w-8 h-8 rounded-full flex items-center justify-center
-                             bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700
-                             text-gray-500 hover:text-red-600 hover:border-red-400
-                             transition-colors text-xs font-bold"
+                  style={{
+                    width:"36px", height:"36px", borderRadius:"50%",
+                    display:"flex", alignItems:"center", justifyContent:"center",
+                    background: s.color, color:"#fff",
+                    fontSize:"0.85rem", fontWeight:700, textDecoration:"none",
+                    transition:"opacity 0.15s"
+                  }}
+                  onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.opacity = "0.85")}
+                  onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.opacity = "1")}
                 >
                   {s.icon}
                 </a>
@@ -63,15 +64,17 @@ export default function Footer({ categories }: FooterProps) {
 
           {/* Categories */}
           <div>
-            <h3 className="font-display font-bold text-sm text-gray-900 dark:text-white mb-3 uppercase tracking-wide">
+            <h3 style={{ fontFamily:"var(--font-playfair)", fontWeight:700, fontSize:"0.85rem",
+              color:"var(--text-1)", marginBottom:"12px", textTransform:"uppercase", letterSpacing:"0.07em" }}>
               Categories
             </h3>
-            <ul className="space-y-1.5">
+            <ul style={{ listStyle:"none", display:"flex", flexDirection:"column", gap:"8px" }}>
               {cats.slice(0, 7).map((cat) => (
                 <li key={cat.slug}>
-                  <Link
-                    href={`/categories/${cat.slug}`}
-                    className="font-sans text-sm text-gray-500 dark:text-gray-400 hover:text-red-600 transition-colors"
+                  <Link href={`/categories/${cat.slug}`}
+                    style={{ fontSize:"0.83rem", color:"var(--text-3)", transition:"color 0.15s" }}
+                    onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "var(--brand-red)")}
+                    onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "var(--text-3)")}
                   >
                     {cat.name}
                   </Link>
@@ -82,22 +85,23 @@ export default function Footer({ categories }: FooterProps) {
 
           {/* Pages */}
           <div>
-            <h3 className="font-display font-bold text-sm text-gray-900 dark:text-white mb-3 uppercase tracking-wide">
+            <h3 style={{ fontFamily:"var(--font-playfair)", fontWeight:700, fontSize:"0.85rem",
+              color:"var(--text-1)", marginBottom:"12px", textTransform:"uppercase", letterSpacing:"0.07em" }}>
               Pages
             </h3>
-            <ul className="space-y-1.5">
+            <ul style={{ listStyle:"none", display:"flex", flexDirection:"column", gap:"8px" }}>
               {[
-                { href: "/",         label: "Home" },
-                { href: "/articles", label: "All Articles" },
-                { href: "/search",   label: "Search" },
-                { href: "/about",    label: "About" },
-                { href: "/contact",  label: "Contact" },
-                { href: "/admin/login", label: "Admin" },
+                { href:"/",         label:"Home" },
+                { href:"/articles", label:"All Articles" },
+                { href:"/search",   label:"Search" },
+                { href:"/about",    label:"About" },
+                { href:"/contact",  label:"Contact" },
               ].map((p) => (
                 <li key={p.href}>
-                  <Link
-                    href={p.href}
-                    className="font-sans text-sm text-gray-500 dark:text-gray-400 hover:text-red-600 transition-colors"
+                  <Link href={p.href}
+                    style={{ fontSize:"0.83rem", color:"var(--text-3)", transition:"color 0.15s" }}
+                    onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "var(--brand-red)")}
+                    onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "var(--text-3)")}
                   >
                     {p.label}
                   </Link>
@@ -108,13 +112,16 @@ export default function Footer({ categories }: FooterProps) {
         </div>
 
         {/* Bottom bar */}
-        <div className="border-t border-gray-100 dark:border-gray-800 pt-6 flex flex-col sm:flex-row
-                        items-center justify-between gap-3 text-xs font-sans text-gray-400">
+        <div style={{
+          borderTop:"1px solid var(--border)", paddingTop:"16px",
+          display:"flex", alignItems:"center", justifyContent:"space-between",
+          flexWrap:"wrap", gap:"10px", fontSize:"0.75rem", color:"var(--text-3)"
+        }}>
           <p>© {year} {SITE_NAME}. All rights reserved.</p>
-          <div className="flex gap-4">
-            <Link href="/privacy" className="hover:text-red-600 transition-colors">Privacy Policy</Link>
-            <Link href="/terms"   className="hover:text-red-600 transition-colors">Terms</Link>
-            <span>{SITE_URL.replace("https://", "")}</span>
+          <div style={{ display:"flex", gap:"16px" }}>
+            <Link href="/privacy" style={{ color:"var(--text-3)" }}>Privacy Policy</Link>
+            <Link href="/terms"   style={{ color:"var(--text-3)" }}>Terms</Link>
+            <span>{SITE_URL.replace("https://","")}</span>
           </div>
         </div>
       </div>
