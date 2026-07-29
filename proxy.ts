@@ -1,19 +1,6 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
-export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-
-  // Protect /admin/* but not /admin/login itself
-  if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
-    const session = request.cookies.get("session")?.value;
-    if (!session) {
-      return NextResponse.redirect(new URL("/admin/login", request.url));
-    }
-  }
-
+export default function proxy(request: NextRequest) {
   return NextResponse.next();
 }
-
-export const config = {
-  matcher: ["/admin/:path*"],
-};
