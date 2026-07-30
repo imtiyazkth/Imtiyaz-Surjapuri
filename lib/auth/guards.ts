@@ -1,28 +1,33 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifySession } from "./session";
-import { SESSION_COOKIE_NAME } from "@/lib/constants";
+import { adminAuth } from "@/lib/firebase/admin";
+
+const SESSION_COOKIE = "session";
 
 /**
- * Use this at the top of any admin API route handler.
- * Returns null if authenticated, or a 401 Response to return immediately.
- *
- * Usage:
- *   const authError = await requireAdmin(request);
- *   if (authError) return authError;
+ * Verify admin session for API routes.
+ * Returns null if authenticated, or a 401/403 Response to return immediately.
  */
 export async function requireAdmin(
   request: NextRequest
 ): Promise<NextResponse | null> {
-  const sessionCookie = request.cookies.get(SESSION_COOKIE_NAME)?.value;
+  const sessionCookie = request.cookies.get(SESSION_COOKIE)?.value;
 
   if (!sessionCookie) {
-    return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
+    return NextResponse.json(
+      { error: "Unauthorised — no session" },
+      { status: 401 }
+    );
   }
 
-  const decoded = await verifySession(sessionCookie);
-  if (!decoded) {
-    return NextResponse.json({ error: "Session expired" }, { status: 401 });
+  try {
+    await adminAuth.verifySessionCookie(sessionCookie, true);
+    return null; // authenticated
+  } catch {
+    const res = NextResponse.json(
+      { error: "Session expired — please login again" },
+      { status: 401 }
+    );
+    res.cookies.delete(SESSION_COOKIE);
+    return res;
   }
-
-  return null; // authenticated — proceed
 }
