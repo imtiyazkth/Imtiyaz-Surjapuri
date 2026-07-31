@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
-export async function middleware(request: NextRequest) {
+// Next.js 16: proxy.ts replaces middleware.ts
+// Function MUST be named "proxy" (not "middleware")
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Protect /admin/* except the login page itself
