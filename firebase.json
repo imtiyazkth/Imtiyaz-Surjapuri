@@ -45,3 +45,21 @@
     "rules": "storage.rules"
   }
 }
+{
+  "hosting": {
+    "public": "public",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "redirects": [
+      {
+        "source": "/:path*",
+        "destination": "https://imtiyaz-site.vercel.app/:path*",
+        "type": 301
+      }
+    ]
+  }
+}
+
