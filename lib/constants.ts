@@ -1,4 +1,4 @@
-export const SITE_NAME = "ISurjapuri";
+export const SITE_NAME = "iSurjapuri";
 export const SITE_TAGLINE = "Independent News, Analysis & Commentary";
 export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL || "https://imtiyazsurjapuri.com";
@@ -34,8 +34,8 @@ export const ALLOWED_SOCIAL_DOMAINS = [
   "whatsapp.com",
   "www.whatsapp.com",
   "wa.me",
-  "isurjapuri.com",
-  "www.isurjapuri.com",
+  "iSurjapuri.com",
+  "www.iSurjapuri.com",
 ];
 
 // Allowed YouTube embed patterns

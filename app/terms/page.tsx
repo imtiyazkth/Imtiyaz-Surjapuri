@@ -4,8 +4,8 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 
 export const metadata = {
-  title: "Terms of Use — ISurjapuri",
-  description: "Terms of Use for ISurjapuri",
+  title: "Terms of Use — iSurjapuri",
+  description: "Terms of Use for iSurjapuri",
 };
 
 export default function TermsPage() {
@@ -30,7 +30,7 @@ export default function TermsPage() {
 
           <div className="article-body" style={{ maxWidth:"none" }}>
             <p>
-              By accessing and using <strong>ISurjapuri</strong> (the &quot;Site&quot;),
+              By accessing and using <strong>iSurjapuri</strong> (the &quot;Site&quot;),
               you agree to be bound by these Terms of Use. If you do not agree,
               please do not use this Site.
             </p>
@@ -90,7 +90,7 @@ export default function TermsPage() {
 
             <h2>6. Limitation of Liability</h2>
             <p>
-              To the maximum extent permitted by law, ISurjapuri and its
+              To the maximum extent permitted by law, iSurjapuri and its
               author shall not be liable for any direct, indirect, incidental, or
               consequential damages arising from your use of this Site.
             </p>
