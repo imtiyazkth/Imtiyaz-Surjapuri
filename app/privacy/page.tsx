@@ -4,8 +4,8 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 
 export const metadata = {
-  title: "Privacy Policy — ImtiyazSurjapuri.com",
-  description: "Privacy Policy for ImtiyazSurjapuri.com",
+  title: "Privacy Policy — ISurjapuri",
+  description: "Privacy Policy for ISurjapuri",
 };
 
 export default function PrivacyPage() {
@@ -30,7 +30,7 @@ export default function PrivacyPage() {
 
           <div className="article-body" style={{ maxWidth:"none" }}>
             <p>
-              Welcome to <strong>ImtiyazSurjapuri.com</strong>. Your privacy is important to us.
+              Welcome to <strong>ISurjapuri</strong>. Your privacy is important to us.
               This Privacy Policy explains how we collect, use, and protect your information
               when you visit our website.
             </p>

@@ -5,8 +5,8 @@ import ScrollProgress from "@/components/layout/ScrollProgress";
 
 export const metadata: Metadata = {
   title: {
-    default:  "ImtiyazSurjapuri.com — Independent News, Analysis & Commentary",
-    template: "%s | ImtiyazSurjapuri.com",
+    default:  "ISurjapuri — Independent News, Analysis & Commentary",
+    template: "%s | ISurjapuri",
   },
   description:
     "Independent journalism, analysis, and commentary covering India, the Gulf, and the world. Speaking truth without fear.",
@@ -15,8 +15,8 @@ export const metadata: Metadata = {
   ),
   openGraph: {
     type:        "website",
-    siteName:    "ImtiyazSurjapuri.com",
-    title:       "ImtiyazSurjapuri.com — Independent News, Analysis & Commentary",
+    siteName:    "ISurjapuri",
+    title:       "ISurjapuri — Independent News, Analysis & Commentary",
     description: "Independent journalism, analysis, and commentary covering India, the Gulf, and the world.",
     // Default OG image — shown when no article image is available
     images: [
@@ -24,13 +24,13 @@ export const metadata: Metadata = {
         url:    "https://raw.githubusercontent.com/imtiyazkth/QRaksha/main/docs/assets/Imtiyaz-Surjapuri.png",
         width:  1200,
         height: 630,
-        alt:    "ImtiyazSurjapuri.com",
+        alt:    "ISurjapuri",
       },
     ],
   },
   twitter: {
     card:        "summary_large_image",
-    title:       "ImtiyazSurjapuri.com",
+    title:       "ISurjapuri",
     description: "Independent News, Analysis & Commentary",
     images: [
       "https://raw.githubusercontent.com/imtiyazkth/QRaksha/main/docs/assets/Imtiyaz-Surjapuri.png"

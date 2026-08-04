@@ -1,38 +1,24 @@
 {
   "hosting": {
-    "public": "out",
+    "public": "public_firebase",
     "ignore": [
       "firebase.json",
       "**/.*",
       "**/node_modules/**"
     ],
-    "rewrites": [
+    "redirects": [
       {
-        "source": "**",
-        "destination": "/index.html"
+        "source": "/**",
+        "destination": "https://imtiyaz-site.vercel.app/:splat",
+        "type": 301
       }
     ],
     "headers": [
       {
-        "source": "**/*.@(js|css|woff2|woff|ttf|eot)",
-        "headers": [
-          {
-            "key": "Cache-Control",
-            "value": "public, max-age=31536000, immutable"
-          }
-        ]
-      },
-      {
         "source": "**",
         "headers": [
-          {
-            "key": "X-Frame-Options",
-            "value": "SAMEORIGIN"
-          },
-          {
-            "key": "X-Content-Type-Options",
-            "value": "nosniff"
-          }
+          { "key": "X-Frame-Options",       "value": "SAMEORIGIN" },
+          { "key": "X-Content-Type-Options", "value": "nosniff" }
         ]
       }
     ]

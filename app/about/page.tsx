@@ -4,7 +4,7 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 
 export const metadata = {
-  title: "About — ImtiyazSurjapuri.com",
+  title: "About — ISurjapuri",
   description: "About Imtiyaz Surjapuri — Independent journalist, analyst, and commentator.",
 };
 
@@ -81,7 +81,7 @@ export default function AboutPage() {
           <div className="article-body" style={{ maxWidth:"none" }}>
             <h2>About This Website</h2>
             <p>
-              <strong>ImtiyazSurjapuri.com</strong> is an independent news and analysis
+              <strong>ISurjapuri</strong> is an independent news and analysis
               platform covering politics, social affairs, economy, education, and world events.
               The site aims to provide in-depth analysis and commentary that goes beyond
               surface-level reporting.
